@@ -30,7 +30,8 @@ no =7
 nv = 32
 a = 2^seq(1, no + 1- 1/nv, by = 1/nv)
 
-wavelet_maker <- function(dat){
+wavelet_maker <- function(dat,no,nv){
+  a = 2^seq(1, no + 1- 1/nv, by = 1/nv)
   
   
   life_stages <- unique(dat$variable)

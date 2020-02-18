@@ -1,0 +1,250 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r,echo=FALSE}
+library(WaveletComp)
+library(ggplot2)
+library(here)
+library(reshape2)
+library(Rwave)
+
+load(here("Data","main_dat_f.RData"))
+main_dat_split <- split(main_dat_f,main_dat_f$Temp)
+```
+
+
+A simple function to melt data for easier ggploting 
+```{r}
+melter <- function(dat){
+  return(melt(dat, id.vars = list('Date',"Rep",'Temp')))
+}
+```
+
+```{r}
+Wavelet_Temp_DF <- NULL
+
+wavelet_maker <- function(dat,no,nv){
+  ###Makes the periods with the number of octaves/voices 
+  a = 2^seq(1, no + 1- 1/nv, by = 1/nv)
+  
+  ###How many life-stages there are
+  life_stages <- unique(dat$variable)
+  
+  ###Makes 8 life-stages plot
+  par(mfrow=c(2,4))
+  
+  Wavelet_Life_Stage=NULL
+  ###For each life-stage makes a wavelet graph 
+  for (i in seq(1,length(life_stages))){
+    #subset each data 
+    tmp = subset(dat,dat$variable==life_stages[i])
+    #Anytime there is an NA make into 0 because RWave will not like it
+    tmp$value[is.na(tmp$value)==TRUE] <- 0
+    #Run the continuous wavelet transformation (log transform the value to avoid spikiness)
+    wfit=cwt(sqrt(tmp$value),no, nv,plot=FALSE)
+    #Get the wspec
+    wspec = Mod(wfit)
+    #make the image with the contour on top 
+    
+    image(x = seq(1,nrow(tmp)), wspec, y = a * 2)
+    contour(x=seq(1,nrow(tmp)), wspec, y=a * 2,
+            zlim=c(mean(wspec), max(wspec)), add=TRUE)
+    
+    title(life_stages[i])
+    
+    
+  }  
+  title(unique(tmp$Temp), line = -1, outer = TRUE)
+  
+}
+```
+
+```{r}
+wavelet_analyzer<- function(dat,life_stage,no,nv){
+  ###Makes the periods with the number of octaves/voices 
+     a = 2^seq(1, no + 1- 1/nv, by = 1/nv)
+
+    tmp = subset(dat,dat$variable==life_stages)
+    #Anytime there is an NA make into 0 because RWave will not like it
+    tmp$value[is.na(tmp$value)==TRUE] <- 0
+    #Run the continuous wavelet transformation (log transform the value to avoid spikiness)
+    wfit=cwt(log(tmp$value+1),no, nv,plot=FALSE)
+    #Get the wspec
+    #make the image with the contour on top 
+    
+    return(wfit)
+}
+```
+
+###TEMPERATURE 12
+```{r}
+Temp_12_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 12))
+
+ggplot(Temp_12_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-12")
+
+Temp_12_1 <- melter (subset(main_dat_f, main_dat_f$Temp == 12 & main_dat_f$Rep==1))
+
+```
+
+```{r}
+wavelet_maker(Temp_12_1,7,28)
+```
+
+
+###TEMPERATURE 14
+```{r}
+Temp_14_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 14))
+
+ggplot(Temp_14_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-14")
+
+Temp_14_1 <- melter (subset(main_dat_f, main_dat_f$Temp == 14 & main_dat_f$Rep==1))
+```
+
+```{r}
+wavelet_maker(Temp_14_1,6,32)
+```
+
+
+###TEMPERATURE 16
+```{r}
+Temp_16_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 16))
+
+ggplot(Temp_16_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-16")
+
+Temp_16_2 <- melter (subset(main_dat_f, main_dat_f$Temp == 16 & main_dat_f$Rep==2))
+```
+
+```{r}
+wavelet_maker(Temp_16_2,7,32)
+```
+
+###TEMPERATURE 18
+```{r}
+Temp_18_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 18))
+
+ggplot(Temp_18_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-18")
+
+
+Temp_18_1 <- melter (subset(main_dat_f, main_dat_f$Temp == 18 & main_dat_f$Rep==1))
+```
+
+```{r}
+wavelet_maker(Temp_18_1,9,32)
+```
+
+###Temperature 20
+```{r}
+Temp_20_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 20))
+
+ggplot(Temp_20_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-20")
+
+Temp_20_1 <- melter (subset(main_dat_f, main_dat_f$Temp == 20 & main_dat_f$Rep==1))
+
+```
+
+```{r}
+wavelet_maker(Temp_20_1,8,32)
+```
+
+###TEMPERATURE 22
+```{r}
+Temp_22_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 22))
+
+ggplot(Temp_22_ALL, aes(x = Date, y = sqrt(value), color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-22")
+
+Temp_22_1 <- melter (subset(main_dat_f, main_dat_f$Temp == 22 & main_dat_f$Rep==1))
+
+```
+
+```{r}
+wavelet_maker(Temp_22_1,4,32)
+
+```
+
+
+
+###TEMPERATURE 24
+```{r}
+Temp_24_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 24))
+
+ggplot(Temp_24_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-24")
+
+
+Temp_24_2 <- melter (subset(main_dat_f, main_dat_f$Temp == 24 & main_dat_f$Rep==2))
+
+```
+
+```{r}
+wavelet_maker(Temp_24_2,7,32)
+```
+
+###TEMPERATURE 26
+```{r}
+Temp_26_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 26))
+
+ggplot(Temp_26_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-26")
+
+Temp_26_3 <- melter (subset(main_dat_f, main_dat_f$Temp == 26 & main_dat_f$Rep==3))
+```
+
+```{r}
+wavelet_maker(Temp_26_3,7,32)
+```
+
+###TEMPERATURE 28
+```{r}
+Temp_28_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 28))
+
+ggplot(Temp_28_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-28")
+
+Temp_28_2 <- melter (subset(main_dat_f, main_dat_f$Temp == 28 & main_dat_f$Rep==2))
+```
+
+```{r}
+wavelet_maker(Temp_28_2,6,32)
+```
+
+###TEMPERATURE 30
+```{r}
+Temp_30_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 30))
+
+ggplot(Temp_30_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-30")
+
+
+Temp_30_1 <- melter (subset(main_dat_f, main_dat_f$Temp == 30 & main_dat_f$Rep==1))
+
+```
+
+```{r}
+wavelet_maker(Temp_30_1,6,32)
+```
+
+###TEMPERATURE 32
+```{r}
+Temp_32_ALL <- melter(subset(main_dat_f, main_dat_f$Temp == 32))
+
+ggplot(Temp_32_ALL, aes(x = Date, y = value, color = variable ))+geom_line(size =1)+
+  facet_wrap(~Rep,scales = 'free')+theme_bw() + ggtitle("Temp-32")
+
+Temp_32_1 <- melter (subset(main_dat_f, main_dat_f$Temp == 32 & main_dat_f$Rep==1))
+
+```
+
+```{r}
+wavelet_maker(Temp_32_1,6,32)
+```
